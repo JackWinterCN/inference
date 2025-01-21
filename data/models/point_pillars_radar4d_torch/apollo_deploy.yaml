@@ -1,0 +1,52 @@
+name: point_pillars_radar4d
+date: 2023-11-07
+task_type: 3d_detection
+sensor_type: radar
+framework: PyTorch
+model:
+  inputs:
+  - name: data
+    dtype: float32
+    shape:
+    - 1
+    - 640
+    - 640
+    - 3
+  outputs:
+  - name: predict
+    dtype: float32
+    shape:
+    - 1
+    - 8400
+    - 13
+  - name: feature
+    dtype: float32
+    shape:
+    - 1
+    - 64
+    - 160
+    - 160
+  labels:
+  - Car
+  - Van
+  - Truck
+  - Bus
+  - Cyclist
+  - Pedestrian
+  - Trafficcone
+  - Unknown
+  preprocess:
+  - type: Normalize
+    mean:
+    - 0.485
+    - 0.456
+    - 0.406
+    std:
+    - 0.229
+    - 0.224
+    - 0.225
+  model_files:
+  - name: model
+    type: model
+    size: 272016951
+dataset: kitti

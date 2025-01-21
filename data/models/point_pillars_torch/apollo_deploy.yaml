@@ -1,0 +1,41 @@
+name: point_pillars
+date: 2022-08-15
+task_type: 3d_detection
+sensor_type: lidar
+framework: PyTorch
+model:
+  inputs:
+  - name: data
+    dtype: float32
+    shape:
+    - 1
+    - 64
+    - 560
+    - 800
+  outputs:
+  - name: box3d
+    dtype: float32
+    shape:
+    - -1
+    - 7
+  - name: label
+    dtype: int32
+    shape:
+    - -1
+  - name: confidence
+    dtype: float32
+    shape:
+    - -1
+  labels:
+  - Car
+  - Pedestrian
+  - Cyclist
+  preprocess:
+  - type: LoadPointCloud
+    dim: 4
+    use_dim: 4
+  model_files:
+  - name: pointpillars
+    type:
+    size: 20148
+dataset: Waymo

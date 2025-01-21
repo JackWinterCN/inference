@@ -1,0 +1,4 @@
+data/models/yolox3d_onnx/yolo_libtorch_model_3d.pth filter=lfs diff=lfs merge=lfs -text
+data/models/smoke_torch/smoke_libtorch_model.pth filter=lfs diff=lfs merge=lfs -text
+data/models/yolox3d_onnx/yolo_onnx_model_3d.onnx filter=lfs diff=lfs merge=lfs -text
+data/models/apollo_bevnet_onnx/apollo_bevnet.onnx filter=lfs diff=lfs merge=lfs -text

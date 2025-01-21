@@ -1,0 +1,47 @@
+# base information
+name: CenterPoint
+date: 2023-10-30
+task_type: 3d_detection
+sensor_type: lidar
+framework: PaddlePaddle
+
+# dataset information
+dataset:
+  labels:
+  - smallMot
+  - bigMot
+  - nonMot
+  - pedestrian
+  - TrafficCone
+  name: Apollo
+
+# model information
+model:
+  inputs:
+  - dtype: float32
+    name: data
+    shape:
+    - -1
+    - -1
+  model_files:
+  - name: centerpoint.pdmodel
+    size: 471275
+    type: model
+  - name: centerpoint.pdiparams
+    size: 22313309
+    type: params
+  outputs:
+  - dtype: float32
+    name: box3d
+    shape:
+    - -1
+    - 7
+  - dtype: int32
+    name: label
+    shape:
+    - -1
+  - dtype: float32
+    name: confidence
+    shape:
+    - -1
+  preprocess: []

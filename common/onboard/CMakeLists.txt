@@ -1,0 +1,1 @@
+add_subdirectory(inner_component_messages)
