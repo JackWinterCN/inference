@@ -35,6 +35,15 @@ class CameraDetectionMultiStageComponent final
  public:
   CameraDetectionMultiStageComponent() = default;
   ~CameraDetectionMultiStageComponent() = default;
+
+  /**
+   * @brief set config file path
+   *
+   * @return true
+   * @return false
+   */
+  void SetConfigFilePath(const std::string& conf_path);
+
   /**
    * @brief Init for amera detection 2d compoment
    *
@@ -50,19 +59,27 @@ class CameraDetectionMultiStageComponent final
    * @return false
    */
   bool Proc(const std::shared_ptr<drivers::Image>& msg) override;
+  /**
+   * @brief run local test
+   *
+   * @return true
+   * @return false
+   */
+  bool RunTest();
 
  private:
-  bool InitCameraFrame(const CameraDetectionMultiStage& detection_param);
+  bool InitCameraFrame();
 
-  bool InitObstacleDetector(const CameraDetectionMultiStage& detection_param);
+  bool InitObstacleDetector();
 
   // bool InitTransformWrapper(const CameraDetectionMultiStage& detection_param);
 
   bool InternalProc(const std::shared_ptr<apollo::drivers::Image>& msg,
                     const std::shared_ptr<onboard::CameraFrame>& out_message);
-  int test();
 
  private:
+  std::string conf_path_{"camera_detection_multi_stage_config.pb.txt"};
+  CameraDetectionMultiStage detection_param_;
   int image_height_;
   int image_width_;
   int frame_id_ = 0;

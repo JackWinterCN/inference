@@ -10,3 +10,9 @@ channel {
   output_obstacles_channel_name: "/perception/inner/Detection"
 }
 gpu_id: 0
+test {
+  enable_test: true
+  test_data_folder: "/apollo_workspace/inference/inference_test_data/images/"
+  input_data_file: "ARZ034_12_1499218335_1499218635_520.jpg"
+  output_data_file: "ARZ034_12_1499218335_1499218635_520_res.jpg"
+}

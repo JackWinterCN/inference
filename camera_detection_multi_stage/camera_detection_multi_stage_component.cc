@@ -26,18 +26,22 @@ namespace apollo {
 namespace perception {
 namespace camera {
 
-bool CameraDetectionMultiStageComponent::InitObstacleDetector(
-    const CameraDetectionMultiStage& detection_param) {
+void CameraDetectionMultiStageComponent::SetConfigFilePath(
+    const std::string& conf_path) {
+  conf_path_ = conf_path;
+}
+
+bool CameraDetectionMultiStageComponent::InitObstacleDetector() {
   ObstacleDetectorInitOptions init_options;
   // Init conf file
-  auto plugin_param = detection_param.plugin_param();
+  auto plugin_param = detection_param_.plugin_param();
   init_options.config_path = plugin_param.config_path();
   init_options.config_file = plugin_param.config_file();
-  init_options.gpu_id = detection_param.gpu_id();
-  timestamp_offset_ = detection_param.timestamp_offset();
+  init_options.gpu_id = detection_param_.gpu_id();
+  timestamp_offset_ = detection_param_.timestamp_offset();
 
   // Init camera params
-  std::string camera_name = detection_param.camera_name();
+  std::string camera_name = detection_param_.camera_name();
   base::BaseCameraModelPtr model =
       algorithm::SensorManager::Instance()->GetUndistortCameraModel(
           camera_name);
@@ -52,32 +56,18 @@ bool CameraDetectionMultiStageComponent::InitObstacleDetector(
   image_width_ = model->get_width();
   AERROR << "image_height_: " << image_height_ << " image_width_: "
         << image_width_;
-  // Init detector
-  // RegisterFactoryYoloObstacleDetector1 temp;
-  // {
-  //   ::apollo::perception::lib::FactoryMap &map =
-  //       ::apollo::perception::lib::GlobalFactoryMap()["BaseObstacleDetector"];
-  //   std::cout << "============> register class: " << "YoloObstacleDetector"
-  //             << std::endl;
-  //   if (map.find("YoloObstacleDetector") == map.end()) {
-  //     map["YoloObstacleDetector"] = new ObjectFactoryYoloObstacleDetector();
-  //   }
-  // }
-  // detector_.reset(
-  //     BaseObstacleDetectorRegisterer::GetInstanceByName(plugin_param.name()));
   detector_.reset(new YoloObstacleDetector());
   detector_->Init(init_options);
   return true;
 }
 
-bool CameraDetectionMultiStageComponent::InitCameraFrame(
-    const CameraDetectionMultiStage& detection_param) {
+bool CameraDetectionMultiStageComponent::InitCameraFrame() {
   DataProvider::InitOptions init_options;
   init_options.image_height = image_height_;
   init_options.image_width = image_width_;
-  init_options.do_undistortion = detection_param.enable_undistortion();
-  init_options.sensor_name = detection_param.camera_name();
-  init_options.device_id = detection_param.gpu_id();
+  init_options.do_undistortion = detection_param_.enable_undistortion();
+  init_options.sensor_name = detection_param_.camera_name();
+  init_options.device_id = detection_param_.gpu_id();
   AINFO << "init_options.device_id: " << init_options.device_id
         << " camera_name: " << init_options.sensor_name;
 
@@ -97,25 +87,16 @@ bool CameraDetectionMultiStageComponent::InitCameraFrame(
 
 bool CameraDetectionMultiStageComponent::Init() {
   google::SetStderrLogging(0);
-  CameraDetectionMultiStage detection_param;
-
-  if (!cyber::common::GetProtoFromFile(
-          "/apollo_workspace/inference/camera_detection_multi_stage/conf/camera_detection_multi_stage_config.pb.txt",
-          &detection_param)) {
-    AERROR << "Load camera detection 3d component config failed!";
+  AINFO << "camera detection conf path: " << conf_path_;
+  if (!cyber::common::GetProtoFromFile(conf_path_, &detection_param_)) {
+    AERROR << "Failed to load camera detection config: " << conf_path_;
     return false;
   }
-
-  InitObstacleDetector(detection_param);
-
-  InitCameraFrame(detection_param);
-
+  InitObstacleDetector();
+  InitCameraFrame();
   // InitTransformWrapper(detection_param);
-
   // writer_ = node_->CreateWriter<onboard::CameraFrame>(
   //     detection_param.channel().output_obstacles_channel_name());
-
-  test();
   return true;
 }
 
@@ -171,9 +152,7 @@ bool CameraDetectionMultiStageComponent::InternalProc(
 }
 
 
-int CameraDetectionMultiStageComponent::test() {
-  AINFO << "============================================> start test";
-  AINFO << "============================================> start test";
+bool CameraDetectionMultiStageComponent::RunTest() {
   std::shared_ptr<onboard::CameraFrame> out_message(new (std::nothrow)
                                                         onboard::CameraFrame);
   const int height = 576;
@@ -186,15 +165,10 @@ int CameraDetectionMultiStageComponent::test() {
 
   const int count = 3 * width * height;
   std::vector<float> output_data_vec;
-  cv::Mat img = cv::imread("/apollo_workspace/modules/perception/common/inference/inference_test_data/images/ARZ034_12_1499218335_1499218635_500.jpg");
+  std::string input_file = detection_param_.test().test_data_folder() + "/" +
+                           detection_param_.test().input_data_file();
+  cv::Mat img = cv::imread(input_file);
   AINFO << "init img.cols: " << img.cols << " img.rows: " << img.rows;
-  // cv::Rect roi(0, offset_y, img.cols, img.rows - offset_y);
-  // cv::Mat img_roi = img(roi);
-  // img_roi.copyTo(img);
-  // cv::resize(img, img, cv::Size(width, height));
-  // AINFO << "resized img.cols: " << img.cols << " img.rows: " << img.rows;
-  // cv::imwrite("/apollo_workspace/modules/perception/common/inference/inference_test_data/images/ARZ034_12_1499218335_1499218635_500_resize.jpg", img);
-  // AINFO << "have saved resized image";
   out_message->data_provider = data_provider_;
   // Fill image
   // todo(daohu527): need use real memory size
@@ -216,7 +190,6 @@ int CameraDetectionMultiStageComponent::test() {
   out_message->frame_id = frame_id_;
   ++frame_id_;
 
-
   // Detect
   PERF_BLOCK("camera_2d_detector")
   detector_->Detect(out_message.get());
@@ -233,11 +206,12 @@ int CameraDetectionMultiStageComponent::test() {
         cv::Point(static_cast<int>(obj->camera_supplement.box.xmax), static_cast<int>(obj->camera_supplement.box.ymax)),
         cv::Scalar(0, 0, 0), 8);
   }
-  cv::imwrite("/apollo_workspace/inference/inference_test_data/images/ARZ034_12_1499218335_1499218635_500_rectangle.jpg", img);
+  std::string output_file = detection_param_.test().test_data_folder() + "/" +
+                            detection_param_.test().output_data_file();
+  cv::imwrite(output_file, img);
   AINFO << "have saved image with box";
-  return 0;
+  return true;
 }
-
 
 }  // namespace camera
 }  // namespace perception

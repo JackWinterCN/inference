@@ -20,9 +20,19 @@
 
 using apollo::perception::camera::CameraDetectionMultiStageComponent;
 
-int main() {
+int main(int argc, char** argv) {
+  apollo::cyber::binary::SetName("InferenceDemo");
+  std::string conf_path =
+    "./camera_detection_multi_stage/conf/camera_detection_multi_stage_config.pb.txt";
+  if (argc > 1) {
+    conf_path = std::string(argv[1]);
+  }
   CameraDetectionMultiStageComponent infer_test;
-
-  infer_test.Init();
+  infer_test.SetConfigFilePath(conf_path);
+  if (!infer_test.Init()) {
+    AERROR << "CameraDetectionMultiStageComponent init failed!";
+    return 1;
+  }
+  infer_test.RunTest();
   return 0;
 }
