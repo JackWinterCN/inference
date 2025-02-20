@@ -30,7 +30,8 @@ std::string GetCommonConfigFile(const std::string &config_file) {
   std::string relative_config_path = config_file;
   if (!apollo::cyber::common::PathIsAbsolute(config_file)) {
     // If config_file is relative, then prepend "modules/" to it.
-    relative_config_path = "modules/perception/data/conf/" + config_file;
+    // relative_config_path = "modules/perception/data/conf/" + config_file;
+    relative_config_path = config_file;
   }
   if (!apollo::cyber::common::GetFilePathWithEnv(
           relative_config_path, "APOLLO_CONF_PATH", &actual_config_path)) {

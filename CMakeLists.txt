@@ -1,5 +1,5 @@
 # cmake_minimum_required(VERSION 3.14...3.19 FATAL_ERROR)
-cmake_minimum_required(VERSION 3.14...3.19 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.16 FATAL_ERROR)
 
 # ---- prediction project ----
 project(inference_tester
@@ -26,6 +26,7 @@ add_definitions(-DNV_TENSORRT_MINOR=6)
 
 set(CUDA_NVCC_FLAGS -gencode arch=compute_86,code=sm_86)
 
+include_directories(${PROTOBUF_INCLUDE_DIR})
 
 # ======BEGIN for target adm ======
 set(TARGET_NAME "inference_demo")
@@ -40,6 +41,7 @@ PUBLIC
     ${PROJECT_SOURCE_DIR}
     ${PROJECT_BINARY_DIR}
     /usr/local/cuda/include/
+    /root/TensorRT-8.6.1.6/include/
     # /usr/local/cuda/include/thrust/
     # /usr/local/cuda/include/thrust/detail
     # ${THIRDPARTY_DIR}/include/
@@ -53,7 +55,8 @@ PUBLIC
     # ${THIRDPARTY_DIR}/include/torch/
     ${THIRDPARTY_DIR}/include/fastdds/
     ${THIRDPARTY_DIR}/include/opencv2/
-    /usr/include/gtsam/3rdparty/Eigen/
+    # /usr/include/gtsam/3rdparty/Eigen/
+    /usr/include/eigen3/
 )
 
 FILE( GLOB HPPS common/inference/utils/*.hpp common/inference/utils/*.h )
@@ -78,7 +81,8 @@ PUBLIC
     # ${THIRDPARTY_DIR}/include/torch/
     ${THIRDPARTY_DIR}/include/fastdds/
     ${THIRDPARTY_DIR}/include/opencv2/
-    /usr/include/gtsam/3rdparty/Eigen/
+    # /usr/include/gtsam/3rdparty/Eigen/
+    /usr/include/eigen3/
 )
 
 
@@ -105,7 +109,8 @@ PUBLIC
     # ${THIRDPARTY_DIR}/include/torch/
     ${THIRDPARTY_DIR}/include/fastdds/
     ${THIRDPARTY_DIR}/include/opencv2/
-    /usr/include/gtsam/3rdparty/Eigen/
+    # /usr/include/gtsam/3rdparty/Eigen/
+    /usr/include/eigen3/
 )
 # add_library(${TARGET_NAME} SHARED)
 add_executable(${TARGET_NAME} inference_test.cc)
@@ -149,8 +154,12 @@ ${THIRDPARTY_DIR}/include/gflags/
 ${THIRDPARTY_DIR}/include/google/
 # ${THIRDPARTY_DIR}/include/torch/
 ${THIRDPARTY_DIR}/include/fastdds/
+${THIRDPARTY_DIR}/include/fastrtps/
+${THIRDPARTY_DIR}/include/fastcdr/
 ${THIRDPARTY_DIR}/include/opencv2/
-/usr/include/gtsam/3rdparty/Eigen/
+/opt/apollo/neo/include/boost
+# /usr/include/gtsam/3rdparty/Eigen/
+/usr/include/eigen3/
 # /opt/apollo/neo/packages/3rd-libtorch-gpu/latest/include/torch/csrc/api/include/
 
 # /usr/include/c++/11/
@@ -174,6 +183,7 @@ PUBLIC
     /opt/apollo/neo/lib/cyber/plugin_manager/
     /opt/apollo/neo/lib/cyber/class_loader/
     /opt/apollo/neo/lib/cyber/class_loader/utility/
+    /opt/apollo/neo/lib/cyber/class_loader/shared_library/
     /opt/apollo/neo/lib/cyber/service_discovery/
     /opt/apollo/neo/lib/cyber/transport/
     /opt/apollo/neo/lib/cyber/message/
@@ -185,6 +195,18 @@ PUBLIC
     /opt/apollo/neo/lib/cyber/event/
     /opt/apollo/neo/lib/cyber/time/
     /opt/apollo/neo/lib/cyber/common/
+    /opt/apollo/neo/lib/cyber/component/
+    /opt/apollo/neo/lib/cyber/context/
+    /opt/apollo/neo/lib/cyber/io/
+    /opt/apollo/neo/lib/cyber/logger/
+    /opt/apollo/neo/lib/cyber/parameter/
+    /opt/apollo/neo/lib/cyber/profiler/
+    /opt/apollo/neo/lib/cyber/record/
+    /opt/apollo/neo/lib/cyber/service/
+    /opt/apollo/neo/lib/cyber/sysmo/
+    /opt/apollo/neo/lib/cyber/timer/
+    /opt/apollo/neo/lib/cyber/data/
+    /opt/apollo/neo/lib/cyber/base/
 
     /opt/apollo/neo/lib/3rd-fastdds-wrap/
 
@@ -195,11 +217,12 @@ PUBLIC
     
     /opt/apollo/neo/lib/3rd-ymal/
 
-    /opt/apollo/neo/lib/3rd-boost/
+    # /opt/apollo/neo/lib/3rd-boost/
     /opt/apollo/neo/lib/3rd-absl/
     /usr/local/cuda/targets/x86_64-linux/lib/
     /opt/apollo/neo/packages/3rd-libtorch-gpu/latest/lib/
     /usr/lib/x86_64-linux-gnu/
+    /root/TensorRT-8.6.1.6/targets/x86_64-linux-gnu/lib/
     # /opt/apollo/neo/lib/3rd-libtorch-cpu/
     # /opt/apollo/neo/lib/3rd-libtorch-gpu/
 )
@@ -233,6 +256,7 @@ target_link_libraries(${TARGET_NAME}
     cyber_binary
 
     fastrtps
+    fastcdr
 
     bvar
     /usr/local/cuda/lib64/libcublasLt.so
@@ -258,7 +282,7 @@ target_link_libraries(${TARGET_NAME}
     opencv_imgcodecs
     opencv_videoio
     
-    boost_filesystem
+    /opt/apollo/neo/lib/3rd-boost/libboost_filesystem.so
     absl_strings
 
     nvinfer

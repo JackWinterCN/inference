@@ -39,7 +39,7 @@ message Debug {
 
 message Test {
   optional bool enable_test = 1 [default = true];
-  optional string test_data_folder = 2 [default = "/apollo_workspace/inference/inference_test_data/images/"];
+  optional string test_data_folder = 2 [default = "/root/autodl-tmp/inference/inference_test_data/images/"];
   optional string input_data_file = 3 [default = "image.jpg"];
   optional string output_data_file = 4 [default = "image_res.jpg"];
 }

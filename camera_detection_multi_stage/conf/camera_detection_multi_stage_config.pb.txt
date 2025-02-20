@@ -2,7 +2,7 @@ camera_name: "front_6mm"
 timestamp_offset: 0.0
 plugin_param {
   name: "YoloObstacleDetector"
-  config_path: "/apollo_workspace/inference/camera_detection_multi_stage/data"
+  config_path: "/root/autodl-tmp/inference/camera_detection_multi_stage/data"
   config_file: "yolo.pb.txt"
 }
 enable_undistortion: false
@@ -12,7 +12,7 @@ channel {
 gpu_id: 0
 test {
   enable_test: true
-  test_data_folder: "/apollo_workspace/inference/inference_test_data/images/"
+  test_data_folder: "/root/autodl-tmp/inference/inference_test_data/images/"
   input_data_file: "ARZ034_12_1499218335_1499218635_520.jpg"
   output_data_file: "ARZ034_12_1499218335_1499218635_520_res.jpg"
 }

@@ -39,7 +39,9 @@ PRIVATE
 
 target_link_libraries(${PROTO_TARGET_NAME}
 PUBLIC
-    protobuf::libprotoc
+    ${PROTOBUF_PROTOC_LIBRARY}
+    ${PROTOBUF_LIBRARY}
+    # protobuf::libprotoc
 )
 
 target_compile_options(${PROTO_TARGET_NAME}
